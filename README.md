@@ -29,9 +29,10 @@ Pralka automatyczna to system czasu rzeczywistego, który:
    - `Sterowanie_Zaworami` – włączanie/wyłączanie zaworów wody (pobór, odpływ).
    - `Sterowanie_Pompą` – odpompowywanie wody.
    - `Zarządzanie_Alarmami` – sygnalizacja błędów i zakończenia cyklu.
-   
+
 4. **Dane**:
    - `Konfiguracja_Programu` – parametry wybranego cyklu prania.
+   (Do uzupełnienia)
 5. **Urządzenia**:
    - `Silnik bębna`
    - `Zawory_Wlotowy`
@@ -45,12 +46,11 @@ Pralka automatyczna to system czasu rzeczywistego, który:
    - `Czujnik_Drzwi` - wykrywaniezamknięcia drzwi
    - `Czujnik_Wycieków` - wykrywanie wyciekającej wody
    - `Czujnik_Prędkości_Bębna` - monitoring obrotów bębna
-   - `
 
 ## Diagramy (do dodania)
 
 ## Autor
-Jan Majchrowicz\
+- Jan Majchrowicz\
 [GitHub/majchjan](https://github.com/majchjan)  
 
 ## Licencja
