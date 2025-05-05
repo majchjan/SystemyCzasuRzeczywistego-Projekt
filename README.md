@@ -25,18 +25,11 @@ Pralka automatyczna to system czasu rzeczywistego, który:
    - `Czujnik_Temperatury` – nadzorowanie temperatury wody.
    - `Monitorowanie_Bębna` – kontrola prędkości i przeciążeń bębna.
    - `Bezpieczeństwo_Drzwi` – nadzór nad zamknięciem i blokadą drzwi.
-
-   Monitorowanie_Wycieków – detekcja wycieków wody (awaria uszczelki itp.).
-
-   Sterowanie_Grzałką – podgrzewanie wody do zadanej temperatury.
-
-   Sterowanie_Zaworami – włączanie/wyłączanie zaworów wody (pobór, odpływ).
-
-   Sterowanie_Pompą – odpompowywanie wody.
-
-   Zarządzanie_Alarmami – sygnalizacja błędów i zakończenia cyklu.
-
-   Zarządzanie_Siecią – komunikacja z aplikacją lub serwisem.
+   - `Sterowanie_Grzałką` – podgrzewanie wody do zadanej temperatury.
+   - `Sterowanie_Zaworami` – włączanie/wyłączanie zaworów wody (pobór, odpływ).
+   - `Sterowanie_Pompą` – odpompowywanie wody.
+   - `Zarządzanie_Alarmami` – sygnalizacja błędów i zakończenia cyklu.
+   
 4. **Dane**:
    - `Konfiguracja_Programu` – parametry wybranego cyklu prania.
 5. **Urządzenia**:
