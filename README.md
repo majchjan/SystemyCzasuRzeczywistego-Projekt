@@ -14,14 +14,45 @@ Pralka automatyczna to system czasu rzeczywistego, który:
 2. **Procesy**:
    - `Sterowanie_Cykle` – zarządza programami prania.
    - `Czujniki` – odczyt danych z sensorów (temperatura, poziom wody).
-   - `Aktuatory` – sterowanie silnikiem, zaworami, pompą.
-3. **Wątki**:
+   - `Aktuatory` – kontrola elementów wykonawczych
    - `Obsługa_Użytkownika` – reakcja na przyciski panelu.
    - `Monitorowanie_Awarii` – wykrywanie błędów (np. przeciek).
+   - `Zarządzanie_Energią` – minimalizacja zużycia energii podczas pracy.
+3. **Wątki**:
+   - `Wybór_Programu` – wybór i zapisywanie ustawień prania.
+   - `Start_Stop_Pauza` – inicjowanie, zatrzymywanie i pauzowanie cyklu.
+   - `Czujnik_Poziomu_Wody` – monitorowanie i regulacja poziomu wody.
+   - `Czujnik_Temperatury` – nadzorowanie temperatury wody.
+   - `Monitorowanie_Bębna` – kontrola prędkości i przeciążeń bębna.
+   - `Bezpieczeństwo_Drzwi` – nadzór nad zamknięciem i blokadą drzwi.
+
+   Monitorowanie_Wycieków – detekcja wycieków wody (awaria uszczelki itp.).
+
+   Sterowanie_Grzałką – podgrzewanie wody do zadanej temperatury.
+
+   Sterowanie_Zaworami – włączanie/wyłączanie zaworów wody (pobór, odpływ).
+
+   Sterowanie_Pompą – odpompowywanie wody.
+
+   Zarządzanie_Alarmami – sygnalizacja błędów i zakończenia cyklu.
+
+   Zarządzanie_Siecią – komunikacja z aplikacją lub serwisem.
 4. **Dane**:
    - `Konfiguracja_Programu` – parametry wybranego cyklu prania.
 5. **Urządzenia**:
-   - `Silnik`, `Zawory_Wody`, `Grzałka` – fizyczne komponenty.
+   - `Silnik bębna`
+   - `Zawory_Wlotowy`
+   - `Grzałka_Wody`
+   - `Pompa_Wody` - do odpompowywania wody po praniu
+   - `Elektrozamek_Drzwi`
+   - `Zawór_Nadmienego_Wyplywu` - awaryjne spuszczanie wody w przypadku przepełnienia.
+   - `Alarm_Dzwiekowy` - na rozpoczęcie i zakończenie pracy oraz w przypadku awarii
+   - `Czujnik_Temperatury`
+   - `Czujnik_Poziomu_Wody`
+   - `Czujnik_Drzwi` - wykrywaniezamknięcia drzwi
+   - `Czujnik_Wycieków` - wykrywanie wyciekającej wody
+   - `Czujnik_Prędkości_Bębna` - monitoring obrotów bębna
+   - `
 
 ## Diagramy (do dodania)
 

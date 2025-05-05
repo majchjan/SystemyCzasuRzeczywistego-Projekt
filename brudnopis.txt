@@ -1,0 +1,126 @@
+
+
+1. Dodatkowe procesy:
+Zarządzanie Energią – np. optymalizacja zużycia prądu, grzanie tylko wtedy, gdy to konieczne.
+
+Komunikacja (opcjonalnie) – np. jeśli pralka ma funkcje Smart (Bluetooth, Wi-Fi) do powiadomień.
+
+2. Dodatkowe wątki:
+Kalibracja – sprawdzanie, czy bęben jest prawidłowo wyważony przed rozpoczęciem wirowania.
+
+Monitorowanie Prędkości Bębna – aby nie przekraczać bezpiecznych obrotów.
+
+3. Dodatkowe urządzenia:
+Czujnik Wyważenia Bębna – wykrywa niewyważone obciążenie.
+
+Czujnik Napełnienia Wody – dokładniejsze kontrolowanie ilości wody.
+
+Czujnik Drzwi – czy drzwi są prawidłowo zamknięte.
+
+Moduł Komunikacyjny – jeśli jest obsługa aplikacji lub połączenia sieciowego.
+
+4. Dodatkowe aktuatory:
+Elektrozamek Drzwi – blokowanie drzwi na czas prania.
+
+Pompa Odpływowa – odprowadzanie brudnej wody.
+
+Dysze Płukania – niektóre modele mają dodatkowe systemy natrysku wody.
+
+---
+
+Oto dodatkowe procesy, wątki, aktuatory i urządzenia, które możesz dodać, aby model pralki automatycznej był bardziej szczegółowy i zgodny z rzeczywistością.
+
+Uzupełniony projekt
+Procesy:
+Sterowanie_Cyklami (już masz) – zarządzanie przebiegiem programu.
+
+Czujniki (już masz) – zbieranie danych ze środowiska pralki.
+
+Aktuatory (już masz) – kontrola elementów wykonawczych.
+
+Obsługa_Użytkownika (już masz) – odbieranie i obsługa komend użytkownika.
+
+Monitorowanie_Awarii (już masz) – wykrywanie i reakcja na błędy.
+
+Zarządzanie_Energią – minimalizacja zużycia energii podczas pracy.
+
+Komunikacja_Zewnętrzna – obsługa połączeń sieciowych (np. aplikacja mobilna).
+
+Optymalizacja_Wagi – kontrola równowagi obciążenia bębna przed wirowaniem.
+
+Wątki:
+(Każdy proces może mieć 1+ wątków. Można je modelować w AADL.)
+
+Wybór_Programu – wybór i zapisywanie ustawień prania.
+
+Start_Stop_Pauza – inicjowanie, zatrzymywanie i pauzowanie cyklu.
+
+Czujnik_Poziomu_Wody – monitorowanie i regulacja poziomu wody.
+
+Czujnik_Temperatury – nadzorowanie temperatury wody.
+
+Monitorowanie_Bębna – kontrola prędkości i przeciążeń bębna.
+
+Kalibracja_Wyważenia – sprawdzanie wyważenia przed rozpoczęciem wirowania.
+
+Bezpieczeństwo_Drzwi – nadzór nad zamknięciem i blokadą drzwi.
+
+Monitorowanie_Wycieków – detekcja wycieków wody (awaria uszczelki itp.).
+
+Sterowanie_Grzałką – podgrzewanie wody do zadanej temperatury.
+
+Sterowanie_Zaworami – włączanie/wyłączanie zaworów wody (pobór, odpływ).
+
+Sterowanie_Pompą – odpompowywanie wody.
+
+Zarządzanie_Alarmami – sygnalizacja błędów i zakończenia cyklu.
+
+Zarządzanie_Siecią – komunikacja z aplikacją lub serwisem.
+
+Aktuatory:
+Silnik_Bębna – napędzanie bębna, zmiana kierunku i prędkości.
+
+Grzałka_Wody – podgrzewanie wody.
+
+Zawór_Wlotowy – sterowanie poborem wody (zimnej/ciepłej).
+
+Pompa_Wody – odpompowywanie wody na koniec cyklu.
+
+Zamek_Drzwi – blokowanie i odblokowywanie drzwi.
+
+Zawór_Nadmiernego_Wypływu – 
+
+Dysze_Płukania – dodatkowe natryski wody (w modelach premium).
+
+Alarm_Dźwiękowy – generowanie sygnału zakończenia pracy lub awarii.
+
+Urządzenia:
+Czujnik_Temperatury – pomiar temperatury wody.
+
+Czujnik_Poziomu_Wody – detekcja poziomu cieczy.
+
+Czujnik_Wyważenia_Bębna – ocena rozłożenia ładunku w bębnie.
+
+Czujnik_Drzwi – wykrywanie zamknięcia drzwi.
+
+Czujnik_Wycieków – wykrywanie wyciekającej wody.
+
+Czujnik_Prędkości_Bębna – monitoring obrotów bębna.
+
+Moduł_Łączności – obsługa Wi-Fi/Bluetooth.
+
+Krótka ilustracja podziału:
+
+Typ	Nazwa	Opis
+Proces	Zarządzanie_Energią	Oszczędne zarządzanie energią pralki
+Proces	Komunikacja_Zewnętrzna	Łączenie się z aplikacją mobilną
+Wątek	Monitorowanie_Bębna	Kontrola prędkości i wyważenia bębna
+Wątek	Monitorowanie_Wycieków	Czujnik wycieku wody
+Aktuator	Zamek_Drzwi	Blokada drzwi podczas pracy
+Urządzenie	Moduł_Łączności	Komunikacja Wi-Fi, Bluetooth
+Podsumowanie
+Jeśli uwzględnisz powyższe elementy, Twój projekt będzie bardzo rozbudowany i realistyczny, przy zachowaniu czytelności modelu AADL.
+W OSATE2 można wtedy tworzyć osobne subsystemy dla np. "Sterowania", "Bezpieczeństwa", "Komunikacji" itd.
+
+Chcesz, abym teraz przygotował Ci jeszcze przykład kompletnego "szkieletu" w AADL (system, process, thread, device, data) pasującego do tej rozbudowanej wersji?
+Byłby gotowy do wklejenia w OSATE2 🚀.
