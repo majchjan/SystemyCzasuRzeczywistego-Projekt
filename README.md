@@ -51,6 +51,7 @@ Pralka automatyczna to system czasu rzeczywistego, który musi reagować na zdar
    - `Konfiguracja` - parametry systemowe
    - `Dane_Sensorowe` - format danych z czujników
    - `Status_Systemu` - bieżący stan pralki
+   - `Dane_Sterujące` - wartości sterujące aktuatorami
 
 5. **Przepływy danych (Flows)**
 
