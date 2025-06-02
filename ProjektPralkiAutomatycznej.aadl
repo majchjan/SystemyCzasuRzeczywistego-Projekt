@@ -4,27 +4,47 @@
 -- Przedmiot: Systemy Czasu Rzeczywistego
 -- ===================================================================
 
-package Projekt_Pralki_Automatycznej
-
+package Pralka_Automatyczna
 public
-    with SEI;
-    with Data_Model;
+  with SEI;
+  with Data_Model;
 
 -- ===================================================================
 -- TYPY DANYCH
 -- ===================================================================
 
 data Typ_Programu
-    properties
-        Data_Model::Data_Representation => Enum;
-        Data_Model::Enumerators => ("Bawelna", "Syntetyki", "Delikatne", "Szybkie", "Wirowanie");
+  properties
+    Data_Model::Data_Representation => Enum;
+    Data_Model::Enumerators => ("Bawelna", "Syntetyki", "Delikatne", "Szybkie", "Wirowanie");
 end Typ_Programu;
 
+data Dane_Sensorowe
+  features
+    temperatura: out data port Base_Types::Float;
+    poziom_wody: out data port Base_Types::Integer;
+    predkosc_bebna: out data port Base_Types::Integer;
+    stan_drzwi: out data port Base_Types::Boolean;
+    wykrycie_wycieku: out data port Base_Types::Boolean;
+  properties
+    Data_Model::Data_Representation => Struct;
+end Dane_Sensorowe;
+
 data Status_Systemu
-    properties
-        Data_Model::Data_Representation => Enum;
-        Data_Model::Enumerators => ("Bezczynny", "Pranie", "Plukanie", "Wirowanie", "Zakonczone", "Awaria");
+  properties
+    Data_Model::Data_Representation => Enum;
+    Data_Model::Enumerators => ("Bezczynny", "Pranie", "Plukanie", "Wirowanie", "Zakonczone", "Awaria");
 end Status_Systemu;
+
+data Dane_Sterujace
+  features
+    moc_grzalki: in data port Base_Types::Integer;
+    predkosc_silnika: in data port Base_Types::Integer;
+    stan_zaworow: in data port Base_Types::Boolean;
+    stan_pompy: in data port Base_Types::Boolean;
+  properties
+    Data_Model::Data_Representation => Struct;
+end Dane_Sterujace;
 
 data Konfiguracja
   features
@@ -37,22 +57,363 @@ data Konfiguracja
 end Konfiguracja;
 
 -- ===================================================================
--- PROCESY
+-- URZĄDZENIA
 -- ===================================================================
+
+device Silnik_Bebna
+  features
+    sterowanie: in data port Dane_Sterujace;
+    feedback: out data port Base_Types::Integer;
+    kontrola_bus: requires bus access Bus_Control;
+  properties
+    SEI::PowerBudget => 2000.0 mW;
+end Silnik_Bebna;
+
+device implementation Silnik_Bebna.impl
+end Silnik_Bebna.impl;
+
+device Zawor_Wlotowy
+  features
+    polecenie_otwarcia: in event port;
+    polecenie_zamkniecia: in event port;
+    status: out data port Base_Types::Boolean;
+    kontrola_bus: requires bus access Bus_Control;
+  properties
+    SEI::PowerBudget => 50.0 mW;
+end Zawor_Wlotowy;
+
+device implementation Zawor_Wlotowy.impl
+end Zawor_Wlotowy.impl;
+
+device Grzalka_Wody
+  features
+    sterowanie_moca: in data port Base_Types::Integer;
+    feedback_temp: out data port Base_Types::Float;
+    kontrola_bus: requires bus access Bus_Control;
+  properties
+    SEI::PowerBudget => 2500.0 mW;
+end Grzalka_Wody;
+
+device implementation Grzalka_Wody.impl
+end Grzalka_Wody.impl;
+
+device Pompa_Wody
+  features
+    wlacz: in event port;
+    wylacz: in event port;
+    status: out data port Base_Types::Boolean;
+    kontrola_bus: requires bus access Bus_Control;
+  properties
+    SEI::PowerBudget => 800.0 mW;
+end Pompa_Wody;
+
+device implementation Pompa_Wody.impl
+end Pompa_Wody.impl;
+
+device Elektrozamek_Drzwi
+  features
+    zablokuj: in event port;
+    odblokuj: in event port;
+    status_blokady: out data port Base_Types::Boolean;
+    kontrola_bus: requires bus access Bus_Control;
+  properties
+    SEI::PowerBudget => 30.0 mW;
+end Elektrozamek_Drzwi;
+
+device implementation Elektrozamek_Drzwi.impl
+end Elektrozamek_Drzwi.impl;
+
+device Alarm_Dzwiekowy
+  features
+    aktywuj: in event port;
+    dezaktywuj: in event port;
+    kontrola_bus: requires bus access Bus_Control;
+  properties
+    SEI::PowerBudget => 100.0 mW;
+end Alarm_Dzwiekowy;
+
+device implementation Alarm_Dzwiekowy.impl
+end Alarm_Dzwiekowy.impl;
+
+-- CZUJNIKI
+
+device Czujnik_Temperatury
+  features
+    odczyt: out data port Base_Types::Float;
+    data_bus: requires bus access Bus_Data;
+  properties
+    SEI::PowerBudget => 10.0 mW;
+end Czujnik_Temperatury;
+
+device implementation Czujnik_Temperatury.impl
+end Czujnik_Temperatury.impl;
+
+device Czujnik_Poziomu_Wody
+  features
+    poziom: out data port Base_Types::Integer;
+    data_bus: requires bus access Bus_Data;
+  properties
+    SEI::PowerBudget => 15.0 mW;
+end Czujnik_Poziomu_Wody;
+
+device implementation Czujnik_Poziomu_Wody.impl
+end Czujnik_Poziomu_Wody.impl;
+
+device Czujnik_Drzwi
+  features
+    stan_zamkniecia: out data port Base_Types::Boolean;
+    zdarzenie_otwarcia: out event port;
+    data_bus: requires bus access Bus_Data;
+  properties
+    SEI::PowerBudget => 5.0 mW;
+end Czujnik_Drzwi;
+
+device implementation Czujnik_Drzwi.impl
+end Czujnik_Drzwi.impl;
+
+device Czujnik_Wyciekow
+  features
+    wykrycie: out event port;
+    stan: out data port Base_Types::Boolean;
+    data_bus: requires bus access Bus_Data;
+  properties
+    SEI::PowerBudget => 20.0 mW;
+end Czujnik_Wyciekow;
+
+device implementation Czujnik_Wyciekow.impl
+end Czujnik_Wyciekow.impl;
+
+device Czujnik_Predkosci_Bebna
+  features
+    obroty: out data port Base_Types::Integer;
+    data_bus: requires bus access Bus_Data;
+  properties
+    SEI::PowerBudget => 25.0 mW;
+end Czujnik_Predkosci_Bebna;
+
+device implementation Czujnik_Predkosci_Bebna.impl
+end Czujnik_Predkosci_Bebna.impl;
+
+-- ===================================================================
+-- MAGISTRALE
+-- ===================================================================
+
+bus Bus_Data
+  properties
+    SEI::BandWidthCapacity => 1000.0 KBytesps;
+end Bus_Data;
+
+bus implementation Bus_Data.impl
+end Bus_Data.impl;
+
+bus Bus_Control
+  properties
+    SEI::BandWidthCapacity => 500.0 KBytesps;
+end Bus_Control;
+
+bus implementation Bus_Control.impl
+end Bus_Control.impl;
+
+-- ===================================================================
+-- PROCESOR I PAMIĘĆ
+-- ===================================================================
+
+processor CPU_Main
+  features
+    data_bus: requires bus access Bus_Data;
+    control_bus: requires bus access Bus_Control;
+  properties
+    SEI::PowerBudget => 1000.0 mW;
+end CPU_Main;
+
+processor implementation CPU_Main.impl
+end CPU_Main.impl;
+
+memory RAM
+  features
+    data_bus: requires bus access Bus_Data;
+  properties
+    SEI::RAMCapacity => 8.0 MB;
+    SEI::PowerBudget => 200.0 mW;
+end RAM;
+
+memory implementation RAM.impl
+end RAM.impl;
+
+memory ROM
+  features
+    data_bus: requires bus access Bus_Data;
+  properties
+    SEI::ROMCapacity => 4.0 MB;
+    SEI::PowerBudget => 50.0 mW;
+end ROM;
+
+memory implementation ROM.impl
+end ROM.impl;
+
+-- ===================================================================
+-- WĄTKI (THREADS)
+-- ===================================================================
+
+thread Wybor_Programu
+  features
+    wybor_uzytkownika: in event data port Typ_Programu;
+    konfiguracja_out: out data port Konfiguracja;
+  properties
+    Dispatch_Protocol => Aperiodic;
+    Priority => 5;
+end Wybor_Programu;
+
+thread implementation Wybor_Programu.impl
+end Wybor_Programu.impl;
+
+thread Start_Stop_Pauza
+  features
+    polecenie_start: in event port;
+    polecenie_stop: in event port;
+    polecenie_pauza: in event port;
+    status_out: out data port Status_Systemu;
+    sterowanie_out: out event port;
+  properties
+    Dispatch_Protocol => Aperiodic;
+    Priority => 8;
+end Start_Stop_Pauza;
+
+thread implementation Start_Stop_Pauza.impl
+end Start_Stop_Pauza.impl;
+
+thread Monitor_Poziomu_Wody
+  features
+    dane_czujnika: in data port Base_Types::Integer;
+    poziom_out: out data port Base_Types::Integer;
+    alarm_poziom: out event port;
+  properties
+    Dispatch_Protocol => Periodic;
+    Period => 500 ms;
+    Priority => 6;
+end Monitor_Poziomu_Wody;
+
+thread implementation Monitor_Poziomu_Wody.impl
+end Monitor_Poziomu_Wody.impl;
+
+thread Monitor_Temperatury
+  features
+    dane_czujnika: in data port Base_Types::Float;
+    temperatura_out: out data port Base_Types::Float;
+    alarm_temp: out event port;
+  properties
+    Dispatch_Protocol => Periodic;
+    Period => 1000 ms;
+    Priority => 4;
+end Monitor_Temperatury;
+
+thread implementation Monitor_Temperatury.impl
+end Monitor_Temperatury.impl;
+
+thread Monitor_Bebna
+  features
+    dane_predkosci: in data port Base_Types::Integer;
+    predkosc_out: out data port Base_Types::Integer;
+    alarm_beban: out event port;
+  properties
+    Dispatch_Protocol => Periodic;
+    Period => 200 ms;
+    Priority => 7;
+end Monitor_Bebna;
+
+thread implementation Monitor_Bebna.impl
+end Monitor_Bebna.impl;
+
+thread Bezpieczenstwo_Drzwi
+  features
+    stan_drzwi: in data port Base_Types::Boolean;
+    zdarzenie_otwarcia: in event port;
+    blokada_out: out event port;
+    odblokowanie_out: out event port;
+    alarm_drzwi: out event port;
+  properties
+    Dispatch_Protocol => Sporadic;
+    Period => 50 ms;
+    Priority => 10;
+end Bezpieczenstwo_Drzwi;
+
+thread implementation Bezpieczenstwo_Drzwi.impl
+end Bezpieczenstwo_Drzwi.impl;
+
+thread Sterowanie_Grzalka
+  features
+    temperatura_aktualna: in data port Base_Types::Float;
+    temperatura_docelowa: in data port Base_Types::Float;
+    sterowanie_out: out data port Base_Types::Integer;
+  properties
+    Dispatch_Protocol => Periodic;
+    Period => 2000 ms;
+    Priority => 3;
+end Sterowanie_Grzalka;
+
+thread implementation Sterowanie_Grzalka.impl
+end Sterowanie_Grzalka.impl;
+
+thread Sterowanie_Zawory
+  features
+    poziom_wody: in data port Base_Types::Integer;
+    poziom_docelowy: in data port Base_Types::Integer;
+    otworz_zawor: out event port;
+    zamknij_zawor: out event port;
+  properties
+    Dispatch_Protocol => Aperiodic;
+    Priority => 6;
+end Sterowanie_Zawory;
+
+thread implementation Sterowanie_Zawory.impl
+end Sterowanie_Zawory.impl;
+
+thread Sterowanie_Pompa
+  features
+    polecenie_odpompowania: in event port;
+    wlacz_pompe: out event port;
+    wylacz_pompe: out event port;
+  properties
+    Dispatch_Protocol => Aperiodic;
+    Priority => 5;
+end Sterowanie_Pompa;
+
+thread implementation Sterowanie_Pompa.impl
+end Sterowanie_Pompa.impl;
+
+thread Zarzadzanie_Alarmami
+  features
+    alarm_poziom: in event port;
+    alarm_temp: in event port;
+    alarm_beban: in event port;
+    alarm_drzwi: in event port;
+    alarm_wyciek: in event port;
+    aktywuj_alarm: out event port;
+    dezaktywuj_alarm: out event port;
+    status_alarmu: out data port Status_Systemu;
+  properties
+    Dispatch_Protocol => Sporadic;
+    Period => 100 ms;
+    Priority => 9;
+end Zarzadzanie_Alarmami;
+
+thread implementation Zarzadzanie_Alarmami.impl
+end Zarzadzanie_Alarmami.impl;
+
+-- ===================================================================
+-- PROCESY (PROCESSES)
+-- ===================================================================
+
 process Sterowanie_Cykle
-    features
-        -- Wejścia
-        wybor_programu: in event data port Typ_Programu;
-        polecenie_start: in event port;
-        polecenie_stop: in event port;
-        polecenie_pauza: in event port;
-        
-        -- Wyjścia
-        status_systemu: out data port Status_Systemu;
-        konfiguracja_out: out data port Konfiguracja;
-        sterowanie_cyklu: out event port;
-    properties
-        SEI::PowerBudget => 5000.0 mW;
+  features
+    wybor_programu: in event data port Typ_Programu;
+    polecenie_start: in event port;
+    polecenie_stop: in event port;
+    polecenie_pauza: in event port;
+    status_systemu: out data port Status_Systemu;
+    konfiguracja_out: out data port Konfiguracja;
+    sterowanie_cyklu: out event port;
+  -- properties
 end Sterowanie_Cykle;
 
 process implementation Sterowanie_Cykle.impl
@@ -69,66 +430,227 @@ process implementation Sterowanie_Cykle.impl
     conn7: port start_stop.sterowanie_out -> sterowanie_cyklu;
 end Sterowanie_Cykle.impl;
 
-
--- ===================================================================
--- WĄTKI
--- ===================================================================
-
-thread Wybor_Programu
+process Czujniki
   features
-    wybor_uzytkownika: in event data port Typ_Programu;
-    konfiguracja_out: out data port Konfiguracja;
-  properties
-    Dispatch_Protocol => Aperiodic;
-    -- SEI::MIPSBudget => 1.0 MIPS;
-    -- Priority => 5;
-end Wybor_Programu;
+    temp_raw: in data port Base_Types::Float;
+    poziom_raw: in data port Base_Types::Integer;
+    predkosc_raw: in data port Base_Types::Integer;
+    temperatura_out: out data port Base_Types::Float;
+    poziom_out: out data port Base_Types::Integer;
+    predkosc_out: out data port Base_Types::Integer;
+    alarm_temp: out event port;
+    alarm_poziom: out event port;
+    alarm_beban: out event port;
+  -- properties
+end Czujniki;
 
-thread implementation Wybor_Programu.impl
-end Wybor_Programu.impl;
+process implementation Czujniki.impl
+  subcomponents
+    mon_temp: thread Monitor_Temperatury.impl;
+    mon_poziom: thread Monitor_Poziomu_Wody.impl;
+    mon_beban: thread Monitor_Bebna.impl;
+  connections
+    conn1: port temp_raw -> mon_temp.dane_czujnika;
+    conn2: port poziom_raw -> mon_poziom.dane_czujnika;
+    conn3: port predkosc_raw -> mon_beban.dane_predkosci;
+    conn4: port mon_temp.temperatura_out -> temperatura_out;
+    conn5: port mon_poziom.poziom_out -> poziom_out;
+    conn6: port mon_beban.predkosc_out -> predkosc_out;
+    conn7: port mon_temp.alarm_temp -> alarm_temp;
+    conn8: port mon_poziom.alarm_poziom -> alarm_poziom;
+    conn9: port mon_beban.alarm_beban -> alarm_beban;
+end Czujniki.impl;
 
-thread Start_Stop_Pauza
+process Aktuatory
   features
-    polecenie_start: in event port;
-    polecenie_stop: in event port;
-    polecenie_pauza: in event port;
-    status_out: out data port Status_Systemu;
-    sterowanie_out: out event port;
-  properties
-    Dispatch_Protocol => Aperiodic;
-    -- SEI::MIPSBudget => 2.0 MIPS;
-    -- Priority => 8;
-end Start_Stop_Pauza;
+    temperatura_aktualna: in data port Base_Types::Float;
+    temperatura_docelowa: in data port Base_Types::Float;
+    poziom_wody: in data port Base_Types::Integer;
+    poziom_docelowy: in data port Base_Types::Integer;
+    polecenie_odpompowania: in event port;
+    sterowanie_grzalki: out data port Base_Types::Integer;
+    otworz_zawor: out event port;
+    zamknij_zawor: out event port;
+    wlacz_pompe: out event port;
+    wylacz_pompe: out event port;
+  -- properties
+end Aktuatory;
 
-thread implementation Start_Stop_Pauza.impl
-end Start_Stop_Pauza.impl;
+process implementation Aktuatory.impl
+  subcomponents
+    ster_grzalka: thread Sterowanie_Grzalka.impl;
+    ster_zawory: thread Sterowanie_Zawory.impl;
+    ster_pompa: thread Sterowanie_Pompa.impl;
+  connections
+    conn1: port temperatura_aktualna -> ster_grzalka.temperatura_aktualna;
+    conn2: port temperatura_docelowa -> ster_grzalka.temperatura_docelowa;
+    conn3: port poziom_wody -> ster_zawory.poziom_wody;
+    conn4: port poziom_docelowy -> ster_zawory.poziom_docelowy;
+    conn5: port polecenie_odpompowania -> ster_pompa.polecenie_odpompowania;
+    conn6: port ster_grzalka.sterowanie_out -> sterowanie_grzalki;
+    conn7: port ster_zawory.otworz_zawor -> otworz_zawor;
+    conn8: port ster_zawory.zamknij_zawor -> zamknij_zawor;
+    conn9: port ster_pompa.wlacz_pompe -> wlacz_pompe;
+    conn10: port ster_pompa.wylacz_pompe -> wylacz_pompe;
+end Aktuatory.impl;
+
+process Monitorowanie_Awarii
+  features
+    stan_drzwi: in data port Base_Types::Boolean;
+    zdarzenie_otwarcia: in event port;
+    alarm_temp: in event port;
+    alarm_poziom: in event port;
+    alarm_beban: in event port;
+    wykrycie_wycieku: in event port;
+    blokada_drzwi: out event port;
+    odblokowanie_drzwi: out event port;
+    aktywuj_alarm: out event port;
+    dezaktywuj_alarm: out event port;
+    status_alarmu: out data port Status_Systemu;
+    alarm_drzwi: out event port;
+  -- properties
+end Monitorowanie_Awarii;
+
+process implementation Monitorowanie_Awarii.impl
+  subcomponents
+    bezp_drzwi: thread Bezpieczenstwo_Drzwi.impl;
+    zarz_alarmy: thread Zarzadzanie_Alarmami.impl;
+  connections
+    conn1: port stan_drzwi -> bezp_drzwi.stan_drzwi;
+    conn2: port zdarzenie_otwarcia -> bezp_drzwi.zdarzenie_otwarcia;
+    conn3: port alarm_temp -> zarz_alarmy.alarm_temp;
+    conn4: port alarm_poziom -> zarz_alarmy.alarm_poziom;
+    conn5: port alarm_beban -> zarz_alarmy.alarm_beban;
+    conn6: port wykrycie_wycieku -> zarz_alarmy.alarm_wyciek;
+    conn7: port bezp_drzwi.alarm_drzwi -> zarz_alarmy.alarm_drzwi;
+    conn8: port bezp_drzwi.blokada_out -> blokada_drzwi;
+    conn9: port bezp_drzwi.odblokowanie_out -> odblokowanie_drzwi;
+    conn10: port zarz_alarmy.aktywuj_alarm -> aktywuj_alarm;
+    conn11: port zarz_alarmy.dezaktywuj_alarm -> dezaktywuj_alarm;
+    conn12: port zarz_alarmy.status_alarmu -> status_alarmu;
+    conn13: port bezp_drzwi.alarm_drzwi -> alarm_drzwi;
+end Monitorowanie_Awarii.impl;
 
 -- ===================================================================
 -- GŁÓWNY SYSTEM
 -- ===================================================================
 
 system Pralka_Automatyczna
-    features
-        -- Interfejsy użytkownika
-        wybor_programu: in event data port Typ_Programu;
-        przycisk_start: in event port;
-        przycisk_stop: in event port;
-        przycisk_pauza: in event port;
-
-        -- Wyjścia
-        status_wyswietlacz: out data port Status_Systemu;
-        sygnalizacja_dzwiekowa: out event port;
-        properties
-            SEI::PowerBudget => 8000.0 mW;
+  features
+    -- Interfejsy użytkownika
+    wybor_programu: in event data port Typ_Programu;
+    przycisk_start: in event port;
+    przycisk_stop: in event port;
+    przycisk_pauza: in event port;
+    
+    -- Wyjścia statusu
+    status_wyswietlacz: out data port Status_Systemu;
+    sygnalizacja_dzwiekowa: out event port;
+  properties
+    SEI::PowerBudget => 8000.0 mW;
 end Pralka_Automatyczna;
 
 system implementation Pralka_Automatyczna.impl
-    subcomponents
-        -- Procesy
-        sterowanie: process Sterowanie_Cykle.impl;
-        czujniki: process Czujniki.impl;
-        aktuatory: process Aktuatory.impl;
-        awarie: process Monitorowanie_Awarii.impl;
+  subcomponents
+    -- Procesy
+    sterowanie: process Sterowanie_Cykle.impl;
+    czujniki: process Czujniki.impl;
+    aktuatory: process Aktuatory.impl;
+    awarie: process Monitorowanie_Awarii.impl;
+    
+    -- Hardware
+    cpu: processor CPU_Main.impl;
+    ram: memory RAM.impl;
+    rom: memory ROM.impl;
+    bus_data: bus Bus_Data.impl;
+    bus_control: bus Bus_Control.impl;
+    
+    -- Urządzenia
+    silnik: device Silnik_Bebna.impl;
+    zawor: device Zawor_Wlotowy.impl;
+    grzalka: device Grzalka_Wody.impl;
+    pompa: device Pompa_Wody.impl;
+    zamek: device Elektrozamek_Drzwi.impl;
+    alarm: device Alarm_Dzwiekowy.impl;
+    
+    -- Czujniki
+    czuj_temp: device Czujnik_Temperatury.impl;
+    czuj_poziom: device Czujnik_Poziomu_Wody.impl;
+    czuj_drzwi: device Czujnik_Drzwi.impl;
+    czuj_wyciek: device Czujnik_Wyciekow.impl;
+    czuj_predkosc: device Czujnik_Predkosci_Bebna.impl;
+    
+  connections
+    -- Połączenia interfejsu użytkownika
+    conn1: port wybor_programu -> sterowanie.wybor_programu;
+    conn2: port przycisk_start -> sterowanie.polecenie_start;
+    conn3: port przycisk_stop -> sterowanie.polecenie_stop;
+    conn4: port przycisk_pauza -> sterowanie.polecenie_pauza;
+    
+    -- Połączenia czujników z procesem czujniki
+    conn5: port czuj_temp.odczyt -> czujniki.temp_raw;
+    conn6: port czuj_poziom.poziom -> czujniki.poziom_raw;
+    conn7: port czuj_predkosc.obroty -> czujniki.predkosc_raw;
+    
+    -- Połączenia między procesami
+    conn8: port czujniki.temperatura_out -> aktuatory.temperatura_aktualna;
+    conn9: port czujniki.poziom_out -> aktuatory.poziom_wody;
+    conn10: port czujniki.alarm_temp -> awarie.alarm_temp;
+    conn11: port czujniki.alarm_poziom -> awarie.alarm_poziom;
+    conn12: port czujniki.alarm_beban -> awarie.alarm_beban;
+    
+    -- Połączenia bezpieczeństwa
+    conn13: port czuj_drzwi.stan_zamkniecia -> awarie.stan_drzwi;
+    conn14: port czuj_drzwi.zdarzenie_otwarcia -> awarie.zdarzenie_otwarcia;
+    conn15: port czuj_wyciek.wykrycie -> awarie.wykrycie_wycieku;
+    
+    -- Połączenia sterowania urządzeniami
+    conn16: port aktuatory.sterowanie_grzalki -> grzalka.sterowanie_moca;
+    conn17: port aktuatory.otworz_zawor -> zawor.polecenie_otwarcia;
+    conn18: port aktuatory.zamknij_zawor -> zawor.polecenie_zamkniecia;
+    conn19: port aktuatory.wlacz_pompe -> pompa.wlacz;
+    conn20: port aktuatory.wylacz_pompe -> pompa.wylacz;
+    
+    -- Połączenia bezpieczeństwa i alarmów
+    conn21: port awarie.blokada_drzwi -> zamek.zablokuj;
+    conn22: port awarie.odblokowanie_drzwi -> zamek.odblokuj;
+    conn23: port awarie.aktywuj_alarm -> alarm.aktywuj;
+    conn24: port awarie.dezaktywuj_alarm -> alarm.dezaktywuj;
+    
+    -- Wyjścia systemu
+    conn25: port sterowanie.status_systemu -> status_wyswietlacz;
+    conn26: port awarie.aktywuj_alarm -> sygnalizacja_dzwiekowa;
+    
+    -- Połączenia magistral
+    bus_conn1: bus access bus_data -> cpu.data_bus;
+    bus_conn2: bus access bus_data -> ram.data_bus;
+    bus_conn3: bus access bus_data -> rom.data_bus;
+    bus_conn4: bus access bus_data -> czuj_temp.data_bus;
+    bus_conn5: bus access bus_data -> czuj_poziom.data_bus;
+    bus_conn6: bus access bus_data -> czuj_drzwi.data_bus;
+    bus_conn7: bus access bus_data -> czuj_wyciek.data_bus;
+    bus_conn8: bus access bus_data -> czuj_predkosc.data_bus;
+    
+    bus_conn9: bus access bus_control -> cpu.control_bus;
+    bus_conn10: bus access bus_control -> silnik.kontrola_bus;
+    bus_conn11: bus access bus_control -> zawor.kontrola_bus;
+    bus_conn12: bus access bus_control -> grzalka.kontrola_bus;
+    bus_conn13: bus access bus_control -> pompa.kontrola_bus;
+    bus_conn14: bus access bus_control -> zamek.kontrola_bus;
+    bus_conn15: bus access bus_control -> alarm.kontrola_bus;
+    
+  properties
+    -- Mapowanie procesów na procesor
+    Actual_Processor_Binding => (reference (cpu)) applies to sterowanie;
+    Actual_Processor_Binding => (reference (cpu)) applies to czujniki;
+    Actual_Processor_Binding => (reference (cpu)) applies to aktuatory;
+    Actual_Processor_Binding => (reference (cpu)) applies to awarie;
+    
+    -- Mapowanie pamięci
+    Actual_Memory_Binding => (reference (ram)) applies to sterowanie;
+    Actual_Memory_Binding => (reference (ram)) applies to czujniki;
+    Actual_Memory_Binding => (reference (ram)) applies to aktuatory;
+    Actual_Memory_Binding => (reference (ram)) applies to awarie;
 end Pralka_Automatyczna.impl;
 
-end Projekt_Pralki_Automatycznej;
+end Pralka_Automatyczna;
