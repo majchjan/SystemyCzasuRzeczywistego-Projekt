@@ -1,2 +1,4 @@
 # Ignorowanie pliku `brudnopis.txt`
 /brudnopis.txt
+/project.aadl
+/projectV2.aadl
