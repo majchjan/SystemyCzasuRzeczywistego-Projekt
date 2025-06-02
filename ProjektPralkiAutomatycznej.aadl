@@ -26,6 +26,83 @@ data Status_Systemu
         Data_Model::Enumerators => ("Bezczynny", "Pranie", "Plukanie", "Wirowanie", "Zakonczone", "Awaria");
 end Status_Systemu;
 
+data Konfiguracja
+  features
+    czas_prania: in data port Base_Types::Integer;
+    temperatura_docelowa: in data port Base_Types::Float;
+    ilosc_plukan: in data port Base_Types::Integer;
+    predkosc_wirowania: in data port Base_Types::Integer;
+  properties
+    Data_Model::Data_Representation => Struct;
+end Konfiguracja;
+
+-- ===================================================================
+-- PROCESY
+-- ===================================================================
+process Sterowanie_Cykle
+    features
+        -- Wejścia
+        wybor_programu: in event data port Typ_Programu;
+        polecenie_start: in event port;
+        polecenie_stop: in event port;
+        polecenie_pauza: in event port;
+        
+        -- Wyjścia
+        status_systemu: out data port Status_Systemu;
+        konfiguracja_out: out data port Konfiguracja;
+        sterowanie_cyklu: out event port;
+    properties
+        SEI::PowerBudget => 5000.0 mW;
+end Sterowanie_Cykle;
+
+process implementation Sterowanie_Cykle.impl
+  subcomponents
+    wybor_prog: thread Wybor_Programu.impl;
+    start_stop: thread Start_Stop_Pauza.impl;
+  connections
+    conn1: port wybor_programu -> wybor_prog.wybor_uzytkownika;
+    conn2: port polecenie_start -> start_stop.polecenie_start;
+    conn3: port polecenie_stop -> start_stop.polecenie_stop;
+    conn4: port polecenie_pauza -> start_stop.polecenie_pauza;
+    conn5: port wybor_prog.konfiguracja_out -> konfiguracja_out;
+    conn6: port start_stop.status_out -> status_systemu;
+    conn7: port start_stop.sterowanie_out -> sterowanie_cyklu;
+end Sterowanie_Cykle.impl;
+
+
+-- ===================================================================
+-- WĄTKI
+-- ===================================================================
+
+thread Wybor_Programu
+  features
+    wybor_uzytkownika: in event data port Typ_Programu;
+    konfiguracja_out: out data port Konfiguracja;
+  properties
+    Dispatch_Protocol => Aperiodic;
+    -- SEI::MIPSBudget => 1.0 MIPS;
+    -- Priority => 5;
+end Wybor_Programu;
+
+thread implementation Wybor_Programu.impl
+end Wybor_Programu.impl;
+
+thread Start_Stop_Pauza
+  features
+    polecenie_start: in event port;
+    polecenie_stop: in event port;
+    polecenie_pauza: in event port;
+    status_out: out data port Status_Systemu;
+    sterowanie_out: out event port;
+  properties
+    Dispatch_Protocol => Aperiodic;
+    -- SEI::MIPSBudget => 2.0 MIPS;
+    -- Priority => 8;
+end Start_Stop_Pauza;
+
+thread implementation Start_Stop_Pauza.impl
+end Start_Stop_Pauza.impl;
+
 -- ===================================================================
 -- GŁÓWNY SYSTEM
 -- ===================================================================
@@ -46,12 +123,12 @@ system Pralka_Automatyczna
 end Pralka_Automatyczna;
 
 system implementation Pralka_Automatyczna.impl
-    -- subcomponents
+    subcomponents
         -- Procesy
-        -- sterowanie: process Sterowanie_Cykle.impl;
-        -- czujniki: process Czujniki.impl;
-        -- aktuatory: process Aktuatory.impl;
-        -- awarie: process Monitorowanie_Awarii.impl;
+        sterowanie: process Sterowanie_Cykle.impl;
+        czujniki: process Czujniki.impl;
+        aktuatory: process Aktuatory.impl;
+        awarie: process Monitorowanie_Awarii.impl;
 end Pralka_Automatyczna.impl;
 
 end Projekt_Pralki_Automatycznej;
