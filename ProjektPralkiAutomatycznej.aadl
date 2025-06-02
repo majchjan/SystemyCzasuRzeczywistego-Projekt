@@ -3,3 +3,55 @@
 -- Autor: Jan Majchrowicz
 -- Przedmiot: Systemy Czasu Rzeczywistego
 -- ===================================================================
+
+package Projekt_Pralki_Automatycznej
+
+public
+    with SEI;
+    with Data_Model;
+
+-- ===================================================================
+-- TYPY DANYCH
+-- ===================================================================
+
+data Typ_Programu
+    properties
+        Data_Model::Data_Representation => Enum;
+        Data_Model::Enumerators => ("Bawelna", "Syntetyki", "Delikatne", "Szybkie", "Wirowanie");
+end Typ_Programu;
+
+data Status_Systemu
+    properties
+        Data_Model::Data_Representation => Enum;
+        Data_Model::Enumerators => ("Bezczynny", "Pranie", "Plukanie", "Wirowanie", "Zakonczone", "Awaria");
+end Status_Systemu;
+
+-- ===================================================================
+-- GŁÓWNY SYSTEM
+-- ===================================================================
+
+system Pralka_Automatyczna
+    features
+        -- Interfejsy użytkownika
+        wybor_programu: in event data port Typ_Programu;
+        przycisk_start: in event port;
+        przycisk_stop: in event port;
+        przycisk_pauza: in event port;
+
+        -- Wyjścia
+        status_wyswietlacz: out data port Status_Systemu;
+        sygnalizacja_dzwiekowa: out event port;
+        properties
+            SEI::PowerBudget => 8000.0 mW;
+end Pralka_Automatyczna;
+
+system implementation Pralka_Automatyczna.impl
+    -- subcomponents
+        -- Procesy
+        -- sterowanie: process Sterowanie_Cykle.impl;
+        -- czujniki: process Czujniki.impl;
+        -- aktuatory: process Aktuatory.impl;
+        -- awarie: process Monitorowanie_Awarii.impl;
+end Pralka_Automatyczna.impl;
+
+end Projekt_Pralki_Automatycznej;
