@@ -2,7 +2,7 @@
 -- Projekt: Pralka Automatyczna w AADL
 -- Autor: Jan Majchrowicz
 -- Przedmiot: Systemy Czasu Rzeczywistego
--- ===================================================================
+-- ===================================================================	
 
 package PralkaAutomatycznaProjekt
 	public
@@ -18,17 +18,6 @@ package PralkaAutomatycznaProjekt
 			    Data_Model::Data_Representation => Enum;
 			    Data_Model::Enumerators => ("Bawelna", "Syntetyki", "Delikatne", "Szybkie", "Wirowanie");
 		end Typ_Programu;
-
-		--data Dane_Sensorowe
-		--  features
-		--    temperatura: out data port Base_Types::Float;
-		--    poziom_wody: out data port Base_Types::Integer;
-		--    predkosc_bebna: out data port Base_Types::Integer;
-		--    stan_drzwi: out data port Base_Types::Boolean;
-		--    wykrycie_wycieku: out data port Base_Types::Boolean;
-		--  properties
-		--    Data_Model::Data_Representation => Struct;
-		--end Dane_Sensorowe;
 
 		data Dane_Sensorowe
 		 	properties
@@ -50,18 +39,6 @@ package PralkaAutomatycznaProjekt
 			    Data_Model::Enumerators => ("Bezczynny", "Pranie", "Plukanie", "Wirowanie", "Zakonczone", "Awaria");
 		end Status_Systemu;
 		
-		--data Dane_Sterujace
-		--  features
-		--    moc_grzalki: in data port Base_Types::Integer;
-		--    predkosc_silnika: in data port Base_Types::Integer;
-		--    stan_zaworow: in data port Base_Types::Boolean;
-		--    stan_pompy: in data port Base_Types::Boolean;
-		--    kierunek_obrotow: in data port Base_Types::Boolean;
-		--    tryb_wirowania: in data port Base_Types::Integer;
-		--  properties
-		--    Data_Model::Data_Representation => Struct;
-		--end Dane_Sterujace;
-		
 		data Dane_Sterujace
 			properties
 		    	Data_Model::Data_Representation => Struct;
@@ -76,16 +53,6 @@ package PralkaAutomatycznaProjekt
 			    kierunek_obrotow: data Base_Types::Boolean;
 			    tryb_wirowania: data Base_Types::Integer;
 		end Dane_Sterujace.impl;
-
-		--data Konfiguracja
-		--  features
-		--    czas_prania: in data port Base_Types::Integer;
-		--    temperatura_docelowa: in data port Base_Types::Float;
-		--    ilosc_plukan: in data port Base_Types::Integer;
-		--    predkosc_wirowania: in data port Base_Types::Integer;
-		--  properties
-		--    Data_Model::Data_Representation => Struct;
-		--end Konfiguracja;
 
 		data Konfiguracja
 			properties
@@ -190,16 +157,21 @@ package PralkaAutomatycznaProjekt
 				wybor_programu_out: out event data port Typ_Programu;
 			    przyciski_out: out event port;
 			    wyswietlacz_in: in data port Status_Systemu;
+			    dodatkowe_info: in data port Base_Types::Integer;
+    			podswietlenie: out data port Base_Types::Boolean;
+    			kontrola_bus: requires bus access Bus_Control;
 			properties
-				SEI::PowerCapacity => 100.0 mW;
-				SEI::WeightLimit => 0.2 kg;
+				SEI::PowerCapacity => 150.0 mW;
+				SEI::WeightLimit => 0.5 kg;
 		end Panel_Sterowania;
 		
 		device implementation Panel_Sterowania.impl
 		end Panel_Sterowania.impl;
-
-		-- CZUJNIKI
 		
+		-- ===================================================================
+		-- CZUJNIKI
+		-- ===================================================================
+
 		device Czujnik_Temperatury
 		  features
 		    odczyt: out data port Base_Types::Float;
@@ -470,6 +442,20 @@ package PralkaAutomatycznaProjekt
 		thread implementation Zarzadzanie_Alarmami.impl
 		end Zarzadzanie_Alarmami.impl;
 
+
+		thread Wyswietlacz_Statusu
+			features
+			    status_in: in data port Status_Systemu;
+			    czas_out: out data port Base_Types::Integer;
+			    status_out: out data port Status_Systemu;
+			properties
+			    Dispatch_Protocol => Periodic;
+			    Period => 500 ms;
+			    Priority => 3;
+		end Wyswietlacz_Statusu;
+		
+		thread implementation Wyswietlacz_Statusu.impl
+		end Wyswietlacz_Statusu.impl;
 		-- ===================================================================
 		-- PROCESY (PROCESSES)
 		-- ===================================================================
@@ -477,7 +463,7 @@ package PralkaAutomatycznaProjekt
 		process Sterowanie_Cykle
 		  features
 		    wybor_programu: in event data port Typ_Programu;
-		    polecenie_start: in event port;
+		    polecenie_start: in event port;	
 		    polecenie_stop: in event port;
 		    polecenie_pauza: in event port;
 		    status_systemu: out data port Status_Systemu;
@@ -642,6 +628,7 @@ package PralkaAutomatycznaProjekt
 		    pompa: device Pompa_Wody.impl;
 		    zamek: device Elektrozamek_Drzwi.impl;
 		    alarm: device Alarm_Dzwiekowy.impl;
+		    panel: device Panel_Sterowania.impl;
 		    
 		    -- Czujniki
 		    czuj_temp: device Czujnik_Temperatury.impl;
@@ -691,6 +678,14 @@ package PralkaAutomatycznaProjekt
 		    conn25: port sterowanie.status_systemu -> status_wyswietlacz;
 		    conn26: port awarie.aktywuj_alarm -> sygnalizacja_dzwiekowa;
 		    
+		    -- Połączenia panelu sterowania
+		    conn27: port panel.wybor_programu_out -> sterowanie.wybor_programu;
+		    conn28: port panel.przyciski_out -> sterowanie.polecenie_start;
+		    conn29: port panel.przyciski_out -> sterowanie.polecenie_stop;
+		    conn30: port panel.przyciski_out -> sterowanie.polecenie_pauza;
+		    conn31: port sterowanie.status_systemu -> panel.wyswietlacz_in;
+
+		    
 		    -- Połączenia magistral
 		    bus_conn1: bus access bus_data -> cpu.data_bus;
 		    bus_conn2: bus access bus_data -> ram.data_bus;
@@ -708,6 +703,9 @@ package PralkaAutomatycznaProjekt
 		    bus_conn13: bus access bus_control -> pompa.kontrola_bus;
 		    bus_conn14: bus access bus_control -> zamek.kontrola_bus;
 		    bus_conn15: bus access bus_control -> alarm.kontrola_bus;
+		    
+		    -- Połączenia magistrali kontrolnej dla panelu
+    		bus_conn16: bus access bus_control -> panel.kontrola_bus;
 		    
 		  properties
 		    -- Mapowanie procesów na procesor
