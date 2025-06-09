@@ -592,18 +592,20 @@ package PralkaAutomatycznaProjekt
 		-- ===================================================================
 		
 		system Pralka_Automatyczna
-		  features
+--		  features
 		    -- Interfejsy użytkownika
-		    wybor_programu: in event data port Typ_Programu;
-		    przycisk_start: in event port;
-		    przycisk_stop: in event port;
-		    przycisk_pauza: in event port;
-		    
-		    -- Wyjścia statusu
-		    status_wyswietlacz: out data port Status_Systemu;
-		    sygnalizacja_dzwiekowa: out event port;
+--		    wybor_programu: in event data port Typ_Programu;
+--		    przycisk_start: in event port;
+--		    przycisk_stop: in event port;
+--		    przycisk_pauza: in event port;
+--		    
+--		    -- Wyjścia statusu
+--		    status_wyswietlacz: out data port Status_Systemu;
+--		    sygnalizacja_dzwiekowa: out event port;
 		  properties
 		    SEI::PowerCapacity => 8000.0 mW;
+		    SEI::WeightLimit => 7.0 kg;
+		    
 		end Pralka_Automatyczna;
 		
 		system implementation Pralka_Automatyczna.impl
@@ -639,10 +641,10 @@ package PralkaAutomatycznaProjekt
 		    
 		  connections
 		    -- Połączenia interfejsu użytkownika
-		    conn1: port wybor_programu -> sterowanie.wybor_programu;
-		    conn2: port przycisk_start -> sterowanie.polecenie_start;
-		    conn3: port przycisk_stop -> sterowanie.polecenie_stop;
-		    conn4: port przycisk_pauza -> sterowanie.polecenie_pauza;
+--		    conn1: port wybor_programu -> sterowanie.wybor_programu;
+--		    conn2: port przycisk_start -> sterowanie.polecenie_start;
+--		    conn3: port przycisk_stop -> sterowanie.polecenie_stop;
+--		    conn4: port przycisk_pauza -> sterowanie.polecenie_pauza;
 		    
 		    -- Połączenia czujników z procesem czujniki
 		    conn5: port czuj_temp.odczyt -> czujniki.temp_raw;
@@ -675,8 +677,8 @@ package PralkaAutomatycznaProjekt
 		    conn24: port awarie.dezaktywuj_alarm -> alarm.dezaktywuj;
 		    
 		    -- Wyjścia systemu
-		    conn25: port sterowanie.status_systemu -> status_wyswietlacz;
-		    conn26: port awarie.aktywuj_alarm -> sygnalizacja_dzwiekowa;
+--		    conn25: port sterowanie.status_systemu -> status_wyswietlacz;
+--		    conn26: port awarie.aktywuj_alarm -> sygnalizacja_dzwiekowa;
 		    
 		    -- Połączenia panelu sterowania
 		    conn27: port panel.wybor_programu_out -> sterowanie.wybor_programu;
