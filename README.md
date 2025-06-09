@@ -149,6 +149,17 @@ Pralka automatyczna oferuje następujące funkcje:
 ### Diagram procesu `Sterowanie_Cykle`:
 ![](./diagrams/ProcesSterowanieCykle.svg)
 
+## Analizy
+
+### Analiza Wagi:
+![](./analysis/analizaWagi.png)
+
+### Analiza Connection Binding Consistency:
+![](./analysis/analizaConnectionBinding.png)
+
+### Analiza BusLoad
+![](./analysis/analizaBusLoad.png)
+
 
 ## Inne informacje
    - Model uwzględnia wymagania czasu rzeczywistego, takie jak okresowe monitorowanie parametrów i szybka reakcja na awarie.
